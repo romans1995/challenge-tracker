@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@mui/material";
 import axios from "axios";
 
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function ProfileImage({ profileImage, setProfileImage }) {
   const fileInputRef = useRef(null);
@@ -52,8 +52,8 @@ export default function ProfileImage({ profileImage, setProfileImage }) {
             width: "160px",
             height: "160px",
             borderRadius: "50%",
-            border: "4px solid blue",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
+            border: "6px solid rgba(0, 174, 255, 0.7)", // ✅ Neon blue border
+            boxShadow: "0px 0px 15px rgba(0, 174, 255, 0.5)", // ✅ Glowing effect
           }}
         />
       ) : (

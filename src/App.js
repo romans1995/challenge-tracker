@@ -8,7 +8,7 @@ import "./App.css";
 
 // import blockedImg from "./assets/blocked.jpg";
 
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function App() {
   const userId = "user123"; // Temporary user ID (Replace with real user authentication later)
@@ -59,7 +59,6 @@ export default function App() {
           setEmojiData(data.emojiData || {}); // ✅ Load saved emoji data
           setProfileImage(data.profileImage || null);
         }
-        console.log(data);
       })
       .catch(err => console.error("❌ Error loading data:", err));
   }, []);
@@ -82,17 +81,26 @@ export default function App() {
     if (day > passedDays) return; // ✅ Prevent clicking future days
   
     let newStatus = "success"; // ✅ First click turns green
+    let updatedEmojiData = { ...emojiData };
+  
     if (dayStatus[day] === "success") {
       setSelectedDay(day);
       setOpenDialog(true); // ✅ Second click opens emoji selection
       return;
     } else if (dayStatus[day] === "fail") {
       newStatus = "success"; // ✅ Third click resets to green
+      updatedEmojiData[day] = "success"; // ✅ Assign success emoji 🎉
     }
   
     const updatedDayStatus = { ...dayStatus, [day]: newStatus };
   
+    // ✅ Remove the failure emoji when switching to success
+    if (newStatus === "success") {
+      updatedEmojiData[day] = "✅"; // ✅ Replace fail emoji with success emoji
+    }
+  
     setDayStatus(updatedDayStatus);
+    setEmojiData(updatedEmojiData);
   
     // ✅ Save Changes to MongoDB
     try {
@@ -100,12 +108,13 @@ export default function App() {
         userId,
         profileImage,
         dayStatus: updatedDayStatus,
-        emojiData,
+        emojiData: updatedEmojiData,
       });
     } catch (error) {
       console.error("❌ Error saving card data:", error);
     }
   };
+  
 
 
 
@@ -140,7 +149,43 @@ export default function App() {
       paddingRight: { xs: "16px", md: "0px" },
       marginLeft: "auto",
     }}>
-      <ProfileImage profileImage={profileImage} setProfileImage={setProfileImage} />
+     <Typography
+  variant="h2"
+  textAlign="center"
+  sx={{
+    fontFamily: "'Orbitron', sans-serif",
+    background: "linear-gradient(90deg, cyan, #00ffcc, #00ffff, #00ccff)", // ✅ Neon gradient
+    WebkitBackgroundClip: "text",
+    WebkitTextFillColor: "transparent",
+    textShadow: "0px 0px 20px rgba(0, 255, 255, 1)", // ✅ Strong neon glow
+    letterSpacing: "4px",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    animation: "pulse 2s infinite alternate",
+    fontSize: { xs: "2rem", sm: "3rem", md: "4rem", lg: "5rem" }, // ✅ Responsive font size
+    "@keyframes pulse": {
+      "0%": { textShadow: "0px 0px 10px rgba(0, 255, 255, 0.6)" },
+      "100%": { textShadow: "0px 0px 25px rgba(0, 255, 255, 1)" },
+    },
+  }}
+>
+  75 Day Habit Challenge
+</Typography>
+<Typography
+  variant="h5"
+  textAlign="center"
+  sx={{
+    fontFamily: "'Poppins', sans-serif",
+    color: "rgba(255, 255, 255, 0.8)",
+    textShadow: "0px 0px 5px rgba(255, 255, 255, 0.5)",
+    letterSpacing: "2px",
+    fontWeight: "300",
+    marginBottom: "15px",
+  }}
+>
+  "Transform Your Life in 75 Days"
+</Typography>
+      <ProfileImage profileImage={profileImage} setProfileImage={setProfileImage} style = {{marginLeft: "auto", marginRight: "auto", padding: "16px"}} />
       <ChallengeTimer/>
 
       <Grid container spacing={2} justifyContent="center">
@@ -154,26 +199,46 @@ export default function App() {
         <Card
           onClick={() => isClickable && handleStatusChange(dayNumber)}
           sx={{
-            width: 100,
-            height: 120,
-            backgroundColor:
+            width: "110px",
+            height: "130px",
+            background: "rgba(255, 255, 255, 0.15)", // ✅ Subtle glass effect
+            backdropFilter: "blur(8px)", // ✅ Soft blur for glass effect
+            border: `2px solid ${
               dayStatus[dayNumber] === "success"
-                ? "green"
+                ? "rgba(0, 255, 127, 0.6)" // ✅ Green glow for success
                 : dayStatus[dayNumber] === "fail"
-                  ? "red"
-                  : "gray",
-            opacity: isClickable ? 1 : 0.7, // ✅ Darken future cards
+                ? "rgba(255, 69, 69, 0.6)" // ✅ Red glow for fail
+                : "rgba(255, 255, 255, 0.3)"
+            }`,
+            boxShadow:
+              dayStatus[dayNumber] === "success"
+                ? "0px 0px 15px rgba(0, 255, 127, 0.5)" // ✅ Green glow shadow
+                : dayStatus[dayNumber] === "fail"
+                ? "0px 0px 15px rgba(255, 69, 69, 0.5)" // ✅ Red glow shadow
+                : isClickable
+                ? "0px 4px 10px rgba(0, 255, 255, 0.3)" // ✅ Default soft neon glow
+                : "none",
             cursor: isClickable ? "pointer" : "not-allowed",
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            borderRadius: "12px",
-            boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
-            position: "relative",
+            borderRadius: "15px",
+            transition: "all 0.3s ease-in-out",
+            position: "relative", // ✅ Allows overlay effect
+            "&:hover": {
+              boxShadow:
+                dayStatus[dayNumber] === "success"
+                  ? "0px 0px 20px rgba(0, 255, 127, 0.7)"
+                  : dayStatus[dayNumber] === "fail"
+                  ? "0px 0px 20px rgba(255, 69, 69, 0.7)"
+                  : "0px 4px 15px rgba(0, 255, 255, 0.5)",
+              transform: isClickable ? "scale(1.05)" : "none",
+            },
           }}
         >
           {isClickable ? (
-            <CardContent>
+            <CardContent 
+            >
               <Typography variant="h5" textAlign="center" color="white">
                 {dayNumber}
               </Typography>
