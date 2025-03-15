@@ -4,6 +4,10 @@ import { Container, Grid, Card, CardContent, Typography, Dialog, DialogTitle, Di
 import ProfileImage from "./components/ProfileImage";
 import ChallengeTimer from "./components/ChallengeTimer";
 
+import "./App.css";
+
+// import blockedImg from "./assets/blocked.jpg";
+
 const BACKEND_URL = "http://localhost:5000"; // Change when deploying
 
 export default function App() {
@@ -51,13 +55,14 @@ export default function App() {
     axios.get(`${BACKEND_URL}/load/${userId}`)
       .then(({ data }) => {
         if (data) {
-          setDayStatus(data.dayStatus || {});
-          setEmojiData(data.emojiData || {});
+          setDayStatus(data.dayStatus || {}); // ✅ Load saved card status
+          setEmojiData(data.emojiData || {}); // ✅ Load saved emoji data
           setProfileImage(data.profileImage || null);
         }
+        console.log(data);
       })
-      .catch(() => console.log("User not found, starting fresh"));
-  }, []); // ✅ Runs only once when the page loads
+      .catch(err => console.error("❌ Error loading data:", err));
+  }, []);
 
   const getPassedDays = () => {
     const now = new Date();
@@ -74,22 +79,22 @@ export default function App() {
 
   const handleStatusChange = async (day) => {
     const passedDays = getPassedDays();
-    if (day > passedDays) return; // ✅ Prevent future days from being clicked
-
-    let newStatus = "success"; // ✅ Default first click turns green
+    if (day > passedDays) return; // ✅ Prevent clicking future days
+  
+    let newStatus = "success"; // ✅ First click turns green
     if (dayStatus[day] === "success") {
       setSelectedDay(day);
-      setOpenDialog(true); // ✅ Second click opens emoji selection for red
-      return; // ✅ Don't update until emoji is selected
+      setOpenDialog(true); // ✅ Second click opens emoji selection
+      return;
     } else if (dayStatus[day] === "fail") {
       newStatus = "success"; // ✅ Third click resets to green
     }
-
+  
     const updatedDayStatus = { ...dayStatus, [day]: newStatus };
-
+  
     setDayStatus(updatedDayStatus);
-
-    // ✅ Save Change to MongoDB Immediately
+  
+    // ✅ Save Changes to MongoDB
     try {
       await axios.post(`${BACKEND_URL}/save`, {
         userId,
@@ -98,7 +103,7 @@ export default function App() {
         emojiData,
       });
     } catch (error) {
-      console.error("❌ Error saving data:", error);
+      console.error("❌ Error saving card data:", error);
     }
   };
 
@@ -106,15 +111,15 @@ export default function App() {
 
   const handleSelectEmoji = async (emoji) => {
     if (!selectedDay) return;
-
+  
     const updatedDayStatus = { ...dayStatus, [selectedDay]: "fail" };
     const updatedEmojiData = { ...emojiData, [selectedDay]: emoji };
-
+  
     setDayStatus(updatedDayStatus);
     setEmojiData(updatedEmojiData);
     setOpenDialog(false);
-
-    // ✅ Save Change to MongoDB Immediately
+  
+    // ✅ Save Changes to MongoDB
     try {
       await axios.post(`${BACKEND_URL}/save`, {
         userId,
@@ -129,51 +134,72 @@ export default function App() {
 
 
   return (
-    <Container>
+    <Container  className="main-container"
+    sx={{
+      paddingLeft: { xs: "16px", md: "0px" },
+      paddingRight: { xs: "16px", md: "0px" },
+      marginLeft: "auto",
+    }}>
       <ProfileImage profileImage={profileImage} setProfileImage={setProfileImage} />
       <ChallengeTimer/>
 
       <Grid container spacing={2} justifyContent="center">
-        {Array.from({ length: totalDays }, (_, i) => {
-          const dayNumber = i + 1;
-          const passedDays = getPassedDays();
-          const isClickable = dayNumber <= passedDays + 1; // ✅ Allow clicking on today & past days
+  {Array.from({ length: totalDays }, (_, i) => {
+    const dayNumber = i + 1;
+    const passedDays = getPassedDays();
+    const isClickable = dayNumber <= passedDays; // ✅ Only past days are clickable
 
-          return (
-            <Grid item key={dayNumber} xs={6} sm={4} md={3} lg={2}>
-              <Card
-                onClick={() => isClickable && handleStatusChange(dayNumber)} // ✅ Only clickable if day has passed
-                sx={{
-                  width: 100,
-                  height: 120,
-                  backgroundColor:
-                    dayStatus[dayNumber] === "success"
-                      ? "green"
-                      : dayStatus[dayNumber] === "fail"
-                        ? "red"
-                        : "gray",
-                  opacity: isClickable ? 1 : 0.3, // ✅ Visually disable future days
-                  cursor: isClickable ? "pointer" : "not-allowed",
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: "12px",
-                  boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
-                }}
-              >
-                <CardContent>
-                  <Typography variant="h5" textAlign="center" color="white">
-                    {dayNumber}
-                  </Typography>
-                  {emojiData[dayNumber] && (
-                    <Typography variant="h5" textAlign="center">{emojiData[dayNumber]}</Typography>
-                  )}
-                </CardContent>
-              </Card>
-            </Grid>
-          );
-        })}
+    return (
+      <Grid item key={dayNumber} xs={6} sm={4} md={3} lg={2}>
+        <Card
+          onClick={() => isClickable && handleStatusChange(dayNumber)}
+          sx={{
+            width: 100,
+            height: 120,
+            backgroundColor:
+              dayStatus[dayNumber] === "success"
+                ? "green"
+                : dayStatus[dayNumber] === "fail"
+                  ? "red"
+                  : "gray",
+            opacity: isClickable ? 1 : 0.7, // ✅ Darken future cards
+            cursor: isClickable ? "pointer" : "not-allowed",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: "12px",
+            boxShadow: "0px 4px 10px rgba(0,0,0,0.3)",
+            position: "relative",
+          }}
+        >
+          {isClickable ? (
+            <CardContent>
+              <Typography variant="h5" textAlign="center" color="white">
+                {dayNumber}
+              </Typography>
+              {emojiData[dayNumber] && (
+                <Typography variant="h5" textAlign="center">
+                  {emojiData[dayNumber]}
+                </Typography>
+              )}
+            </CardContent>
+          ) : (
+            <img
+              src="/images/blocked.webp"
+              alt="Blocked"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+                borderRadius: "12px",
+              }}
+            />
+          )}
+        </Card>
       </Grid>
+    );
+  })}
+</Grid>
 
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Select a reason</DialogTitle>
