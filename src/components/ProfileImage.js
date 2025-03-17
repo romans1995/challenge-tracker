@@ -16,7 +16,7 @@ export default function ProfileImage({ profileImage, setProfileImage }) {
         }
       })
       .catch(err => console.error("❌ Error loading profile image:", err));
-  }, []);
+  }, [setProfileImage]);
 
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
@@ -25,21 +25,22 @@ export default function ProfileImage({ profileImage, setProfileImage }) {
     setLoading(true);
     const formData = new FormData();
     formData.append("image", file);
-    formData.append("userId", "user123");
 
     try {
-      const { data } = await axios.post(`${BACKEND_URL}/upload-image`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+        const { data } = await axios.post(`${BACKEND_URL}/upload-image`, formData, {
+            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}`, "Content-Type": "multipart/form-data" },
+        });
 
-      const imageUrl = `${BACKEND_URL}/${data.imageUrl.replace("\\", "/")}`; // ✅ Fix path issues
-      setProfileImage(imageUrl);
+        const imageUrl = `${BACKEND_URL}/${data.imageUrl}`; // ✅ Ensure correct URL format
+        console.log("🖼️ Image URL:", imageUrl); // ✅ Debugging
+
+        setProfileImage(imageUrl);
     } catch (error) {
-      console.error("❌ Error uploading image:", error);
+        console.error("❌ Error uploading image:", error);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   return (
     <div style={{ textAlign: "center", cursor: "pointer" }}>
