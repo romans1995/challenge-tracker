@@ -14,11 +14,6 @@ export default function MainApp({ user, setUser, handleLogout }) {
   if(!user) {
     navigate("/login"); // ✅ Redirect to login page
   }
-  // const handleLogout = ({setUser}) => {
-  //   localStorage.removeItem("token");
-  //   setUser(null);
-  //   navigate("/login"); // ✅ Redirect to login page
-  // };
   const totalDays = 75;
   const challengeStartDate = new Date("2025-03-09T00:00:00Z");
 
@@ -38,6 +33,9 @@ export default function MainApp({ user, setUser, handleLogout }) {
         setDayStatus(data.dayStatus || {});
         setEmojiData(data.emojiData || {});
         setProfileImage(data.profileImage || null);
+        console.log("user data is : ",data);
+        console.log("📸 Profile token data:", localStorage.getItem("token")); // ✅ Debugging
+
       })
       .catch(() => console.log("User data not found, starting fresh"));
   }, []);
@@ -153,7 +151,7 @@ export default function MainApp({ user, setUser, handleLogout }) {
   Logout 🚪
 </Button>}
 
-      <ProfileImage profileImage={profileImage} setProfileImage={setProfileImage} style = {{marginLeft: "auto", marginRight: "auto", padding: "16px"}} />
+      <ProfileImage userId={user.id} profileImage={profileImage} setProfileImage={setProfileImage} style = {{marginLeft: "auto", marginRight: "auto", padding: "16px"}} />
       <ChallengeTimer/>
 
       <Grid container spacing={2} justifyContent="center">

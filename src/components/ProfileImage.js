@@ -2,45 +2,99 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@mui/material";
 import axios from "axios";
 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
+const BACKEND_URL = "http://localhost:5000"; // Change when deploying
 
-export default function ProfileImage({ profileImage, setProfileImage }) {
+export default function ProfileImage({ userId, profileImage, setProfileImage }) {
   const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/load/user123`)
+    if (!userId) {
+      console.warn("⚠️ No userId provided, skipping profile image fetch.");
+      return;
+    }
+
+    console.log(`🔍 Fetching profile image for user: ${userId}`);
+
+    axios
+      .get(`${BACKEND_URL}/load/${userId}`)
       .then(({ data }) => {
+        console.log("📸 Profile image data received:", data);
         if (data.profileImage) {
-          setProfileImage(data.profileImage);
+          const imageUrl = `${BACKEND_URL}/${data.profileImage}`;
+          console.log("🖼️ Setting profile image:", imageUrl);
+          setProfileImage(imageUrl);
         }
       })
-      .catch(err => console.error("❌ Error loading profile image:", err));
-  }, [setProfileImage]);
+      .catch((err) => console.error("❌ Error loading profile image:", err));
+  }, [userId, setProfileImage]);
 
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];
-    if (!file) return;
+
+    if (!file) {
+      console.error("❌ No file selected.");
+      return;
+    }
+
+    console.log("📤 Selected file:", file.name, "Size:", file.size, "Type:", file.type);
 
     setLoading(true);
     const formData = new FormData();
     formData.append("image", file);
 
-    try {
-        const { data } = await axios.post(`${BACKEND_URL}/upload-image`, formData, {
-            headers: { "Authorization": `Bearer ${localStorage.getItem("token")}`, "Content-Type": "multipart/form-data" },
-        });
-
-        const imageUrl = `${BACKEND_URL}/${data.imageUrl}`; // ✅ Ensure correct URL format
-        console.log("🖼️ Image URL:", imageUrl); // ✅ Debugging
-
-        setProfileImage(imageUrl);
-    } catch (error) {
-        console.error("❌ Error uploading image:", error);
-    } finally {
-        setLoading(false);
+    // Debugging FormData
+    console.log("📂 FormData content:");
+    for (let pair of formData.entries()) {
+      console.log(`   🗂️ ${pair[0]}:`, pair[1]);
     }
-};
+
+    // Fetch token from localStorage
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.error("🚨 No token found in localStorage! User might not be authenticated.");
+      setLoading(false);
+      return;
+    }
+    console.log("🔑 Using token:", token);
+    console.log("BACKEND_URL:", BACKEND_URL);
+    console.log("FormData Entries:");
+for (let pair of formData.entries()) {
+  console.log(pair[0] + ":", pair[1]);
+}
+
+    try {
+      console.log("🚀 Sending image upload request...");
+      const { data } = await axios.post(`${BACKEND_URL}/upload-image`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      console.log("📥 Server response:", data);
+
+      if (!data.imageUrl) {
+        console.error("❌ No image URL received from backend.");
+        return;
+      }
+
+      // Ensure the URL format is correct
+      const imageUrl = `${BACKEND_URL}/${data.imageUrl}`;
+      console.log("🖼️ Updated image URL:", imageUrl);
+      setProfileImage(imageUrl);
+    } catch (error) {
+      if (error.response) {
+        console.error("❌ Server responded with error:", error.response.status, error.response.data);
+      } else if (error.request) {
+        console.error("❌ No response from server. Possible CORS issue or server down.");
+      } else {
+        console.error("❌ Unexpected error:", error.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={{ textAlign: "center", cursor: "pointer" }}>
