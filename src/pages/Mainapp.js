@@ -11,9 +11,7 @@ const BACKEND_URL = "http://localhost:5000"; // ✅ Adjust for production later
 
 export default function MainApp({ user, setUser }) {
   const navigate = useNavigate();
-  if(!user) {
-    navigate("/login"); // ✅ Redirect to login page
-  }
+ 
   const totalDays = 75;
   const challengeStartDate = new Date("2025-03-09T00:00:00Z");
 
@@ -41,16 +39,21 @@ export default function MainApp({ user, setUser }) {
   
 
   useEffect(() => {
-    if (Object.keys(dayStatus).length > 0) {
+    if (
+      user?.id && 
+      Object.keys(dayStatus).length > 0
+    ) {
       axios.post(`${BACKEND_URL}/save`, {
         userId: user.id,
         profileImage,
         dayStatus,
         emojiData,
-      }, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+      }, {
+        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+      })
       .catch(err => console.error("❌ Error saving data:", err));
     }
-  }, [dayStatus, emojiData, profileImage, user.id]);
+  }, [user?.id, dayStatus, emojiData, profileImage]);
 
   const getPassedDays = () => {
     const now = new Date();
@@ -87,7 +90,7 @@ export default function MainApp({ user, setUser }) {
     setOpenDialog(false);
   };
  
-
+  if (!user) return <div>Loading user data...</div>;
   return (
     <Container  className="main-container"
     sx={{

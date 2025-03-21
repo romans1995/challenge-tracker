@@ -12,15 +12,14 @@ const BACKEND_URL = "http://localhost:5000"; // Or your deployed URL
 function AppContent() {
   const [user, setUser] = useState(null);
   const location = useLocation();
+  const [loading, setLoading] = useState(true); // 🆕 Add loading
   const hideNavbar = location.pathname === "/login" || location.pathname === "/signup";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
-    console.log("📦 Token found in localStorage:", token);
-  
-    if (token && !user) {
+    if (token) {
       axios.get(`${BACKEND_URL}/load`, {
-        headers: { Authorization: `Bearer ${token}` }
+        headers: { Authorization: `Bearer ${token}` },
       })
         .then((res) => {
           console.log("✅ User loaded from backend:", res.data);
@@ -30,22 +29,23 @@ function AppContent() {
           console.error("❌ Error loading user:", err);
           localStorage.removeItem("token");
           setUser(null);
+        })
+        .finally(() => {
+          setLoading(false); // ✅ Stop loading regardless of outcome
         });
+    } else {
+      setLoading(false); // ✅ No token, so stop loading
     }
-  }, [user]);
-  // useEffect(() => {
-  //   console.log(user, "user");
-  //   if (user) {
-  //     localStorage.setItem("user", JSON.stringify(user));
-  //   } else {
-  //     localStorage.removeItem("user");
-  //   }
-  // }, [user]);
+  }, []);
+
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     setUser(null);
   };
+  if (loading) {
+    return <div style={{ color: "#00e5ff", textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
+  }
 
   return (
     <>
