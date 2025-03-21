@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const BACKEND_URL = "http://localhost:5000"; // ✅ Adjust for production later
 
-export default function MainApp({ user, setUser, handleLogout }) {
+export default function MainApp({ user, setUser }) {
   const navigate = useNavigate();
   if(!user) {
     navigate("/login"); // ✅ Redirect to login page
@@ -28,17 +28,17 @@ export default function MainApp({ user, setUser, handleLogout }) {
 
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/load`, { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } })
+    axios.get(`${BACKEND_URL}/load`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
       .then(({ data }) => {
         setDayStatus(data.dayStatus || {});
         setEmojiData(data.emojiData || {});
-        setProfileImage(data.profileImage || null);
-        console.log("user data is : ",data);
-        console.log("📸 Profile token data:", localStorage.getItem("token")); // ✅ Debugging
-
+        setProfileImage(data.profileImage || null); // just set it once
       })
       .catch(() => console.log("User data not found, starting fresh"));
-  }, []);
+  }, []); // ✅ Added safely with check to prevent loop
+  
 
   useEffect(() => {
     if (Object.keys(dayStatus).length > 0) {
@@ -131,26 +131,6 @@ export default function MainApp({ user, setUser, handleLogout }) {
 >
   "Transform Your Life in 75 Days"
 </Typography>
-{user &&<Button
-  onClick={handleLogout}
-  variant="contained"
-  sx={{
-    background: "linear-gradient(90deg, #ff416c, #ff4b2b)", // ✅ Gradient red logout button
-    color: "white",
-    fontWeight: "bold",
-    padding: "10px 20px",
-    borderRadius: "8px",
-    boxShadow: "0px 4px 10px rgba(255, 69, 69, 0.5)",
-    transition: "all 0.3s ease-in-out",
-    "&:hover": {
-      background: "linear-gradient(90deg, #ff4b2b, #ff416c)",
-      boxShadow: "0px 4px 15px rgba(255, 69, 69, 0.8)",
-    },
-  }}
->
-  Logout 🚪
-</Button>}
-
       <ProfileImage userId={user.id} profileImage={profileImage} setProfileImage={setProfileImage} style = {{marginLeft: "auto", marginRight: "auto", padding: "16px"}} />
       <ChallengeTimer/>
 

@@ -9,25 +9,19 @@ export default function ProfileImage({ userId, profileImage, setProfileImage }) 
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!userId) {
-      console.warn("⚠️ No userId provided, skipping profile image fetch.");
-      return;
-    }
-
-    console.log(`🔍 Fetching profile image for user: ${userId}`);
-
-    axios
-      .get(`${BACKEND_URL}/load/${userId}`)
+    if (!userId) return;
+  
+    axios.get(`${BACKEND_URL}/load/${userId}`)
       .then(({ data }) => {
-        console.log("📸 Profile image data received:", data);
         if (data.profileImage) {
-          const imageUrl = `${BACKEND_URL}/${data.profileImage}`;
-          console.log("🖼️ Setting profile image:", imageUrl);
-          setProfileImage(imageUrl);
+          const fullUrl = `${BACKEND_URL}/${data.profileImage}`;
+          if (fullUrl !== profileImage) {
+            setProfileImage(fullUrl);
+          }
         }
       })
-      .catch((err) => console.error("❌ Error loading profile image:", err));
-  }, [userId, setProfileImage]);
+      .catch(err => console.error("❌ Error loading profile image:", err));
+  }, [userId, profileImage,setProfileImage]);
 
   const handleImageUpload = async (event) => {
     const file = event.target.files?.[0];

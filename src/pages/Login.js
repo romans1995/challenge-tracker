@@ -12,11 +12,12 @@ export default function Login({ setUser }) {
   const [error, setError] = useState("");
   const navigate = useNavigate(); // ✅ Hook for navigation
 
+  
   const handleLogin = async () => {
     try {
       const { data } = await axios.post(`${BACKEND_URL}/login`, { email, password });
       localStorage.setItem("token", data.token); // ✅ Save token in localStorage
-      setUser(data.user); // ✅ Store user data in state
+      setUser(data.token); // ✅ Store user data in state
       navigate("/"); // ✅ Redirect to main page after login
     } catch (err) {
       setError("Invalid credentials. Please try again.");
