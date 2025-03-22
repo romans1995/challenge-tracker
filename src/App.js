@@ -51,12 +51,21 @@ function AppContent() {
     <>
       {!hideNavbar && <Navbar onLogout={handleLogout} user={user} />}
       <Routes>
-        <Route path="/" element={user ? <MainApp user={user} handleLogout={handleLogout} /> : <Navigate to="/login" />} />
-        <Route path="/login" element={<Login setUser={setUser} />} />
-        <Route path="/signup" element={<Signup setUser={setUser} />} />
-        <Route path="/about" element={<About />} />
-        <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
-      </Routes>
+  <Route
+    path="/"
+    element={user ? <MainApp user={user} handleLogout={handleLogout} /> : <Navigate to="/login" />}
+  />
+  <Route
+    path="/login"
+    element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />}
+  />
+  <Route
+    path="/signup"
+    element={!user ? <Signup setUser={setUser} /> : <Navigate to="/" />}
+  />
+  <Route path="/about" element={<About />} />
+  <Route path="*" element={<Navigate to={user ? "/" : "/login"} />} />
+</Routes>
     </>
   );
 }

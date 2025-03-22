@@ -74,7 +74,7 @@ for (let pair of formData.entries()) {
       }
 
       // Ensure the URL format is correct
-      const imageUrl = `${BACKEND_URL}/${data.imageUrl}`;
+      const imageUrl = `${data.imageUrl}`;
       console.log("🖼️ Updated image URL:", imageUrl);
       setProfileImage(imageUrl);
     } catch (error) {

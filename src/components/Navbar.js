@@ -60,7 +60,12 @@ const Navbar = ({ onLogout ,user}) => {
           >
             Logout
           </Button>
-          <Typography>name</Typography>
+          <Typography 
+          sx={{
+            display: "inline-flex" // ✅ Fixed: Wrapped inline-flex in quotes
+          }}
+        >
+          {user?.email}</Typography>
         </div>
       </Toolbar>
     </AppBar>
