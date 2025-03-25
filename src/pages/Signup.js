@@ -17,9 +17,9 @@ export default function Signup({ setUser }) {
   const handleSignup = async () => {
     try {
       const { data } = await axios.post(`${BACKEND_URL}/signup`, { email, password });
-      localStorage.setItem("token", data.token); // ✅ Save token
-      setUser(data.user);
-      navigate("/");
+      // localStorage.setItem("token", data.token); // ✅ Save token
+      // setUser(data.user);
+      navigate("/login");
 
     } catch (err) {
       setError("Signup failed. Try a different email.");
