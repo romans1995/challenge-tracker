@@ -7,7 +7,7 @@ import Navbar from "./components/Navbar";
 import axios from "axios";
 import About from "./pages/About";
 
-const BACKEND_URL = "http://localhost:5000"; // Or your deployed URL
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Or your deployed URL
 
 function AppContent() {
   const [user, setUser] = useState(null);

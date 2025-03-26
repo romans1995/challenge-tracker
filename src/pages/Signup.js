@@ -4,7 +4,7 @@ import { TextField, Button, Typography, Box, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
 
 
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function Signup({ setUser }) {
   const navigate = useNavigate();

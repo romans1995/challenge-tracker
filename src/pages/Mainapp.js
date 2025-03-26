@@ -6,7 +6,7 @@ import ChallengeTimer from "../components/ChallengeTimer";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
 
-const BACKEND_URL = "http://localhost:5000";
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com";
 
 export default function MainApp({ user, setUser }) {
   const navigate = useNavigate();
@@ -40,6 +40,7 @@ export default function MainApp({ user, setUser }) {
       if (hasImageChanged) {
         payload.profileImage = cleanProfileImage;
       }
+      
   
       axios.post(`${BACKEND_URL}/save`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
@@ -51,7 +52,30 @@ export default function MainApp({ user, setUser }) {
       .finally(() => console.log("saveData call finished"));
     }
   };
-
+  const buildImageUrl = (imagePath) => {
+    if (!imagePath) return null;
+  
+    const cleanBackendUrl = BACKEND_URL.replace(/\/+$/, ""); // remove trailing slash
+    const filename = imagePath.split("/").pop(); // get just the file name
+  
+    // If already a full URL and includes /uploads/, return as-is
+    if (imagePath.startsWith("http") && imagePath.includes("/uploads/")) {
+      return imagePath;
+    }
+  
+    // If full URL but missing /uploads/, fix it
+    if (imagePath.startsWith("http")) {
+      return `${cleanBackendUrl}/uploads/${filename}`;
+    }
+  
+    // If relative path
+    const normalizedPath = imagePath.startsWith("uploads/")
+      ? imagePath
+      : `uploads/${filename}`;
+  
+    return `${cleanBackendUrl}/${normalizedPath}`;
+  };
+  
   useEffect(() => {
     axios.get(`${BACKEND_URL}/load`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
@@ -59,7 +83,8 @@ export default function MainApp({ user, setUser }) {
       .then(({ data }) => {
         setDayStatus(data.dayStatus || {});
         setEmojiData(data.emojiData || {});
-        setProfileImage(data.profileImage || null);
+        setProfileImage(buildImageUrl(data.profileImage));
+        console.log("✅ User data loaded:", data);
       })
       .catch(() => console.log("User data not found, starting fresh"));
   }, []);

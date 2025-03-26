@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@mui/material";
 import axios from "axios";
 
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function ProfileImage({ userId, profileImage, setProfileImage }) {
   const fileInputRef = useRef(null);
