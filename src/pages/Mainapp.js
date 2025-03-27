@@ -5,8 +5,11 @@ import ProfileImage from "../components/ProfileImage";
 import ChallengeTimer from "../components/ChallengeTimer";
 import "../App.css";
 import { useNavigate } from "react-router-dom";
+import justman from '../assets/justman.png';
 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com";
+
+// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
+const BACKEND_URL = "http://localhost:5000"; // Change when deploying
 
 export default function MainApp({ user, setUser }) {
   const navigate = useNavigate();
@@ -55,26 +58,15 @@ export default function MainApp({ user, setUser }) {
   const buildImageUrl = (imagePath) => {
     if (!imagePath) return null;
   
-    const cleanBackendUrl = BACKEND_URL.replace(/\/+$/, ""); // remove trailing slash
-    const filename = imagePath.split("/").pop(); // get just the file name
-  
-    // If already a full URL and includes /uploads/, return as-is
-    if (imagePath.startsWith("http") && imagePath.includes("/uploads/")) {
+    // ✅ If it's already a full Cloudinary or external URL, return as-is
+    if (imagePath.startsWith("http")) {
       return imagePath;
     }
   
-    // If full URL but missing /uploads/, fix it
-    if (imagePath.startsWith("http")) {
-      return `${cleanBackendUrl}/uploads/${filename}`;
-    }
-  
-    // If relative path
-    const normalizedPath = imagePath.startsWith("uploads/")
-      ? imagePath
-      : `uploads/${filename}`;
-  
-    return `${cleanBackendUrl}/${normalizedPath}`;
+    // ✅ Otherwise, it's likely a local fallback
+    return `${BACKEND_URL.replace(/\/+$/, "")}/${imagePath.replace(/^\/+/, "")}`;
   };
+  
   
   useEffect(() => {
     axios.get(`${BACKEND_URL}/load`, {
@@ -83,6 +75,7 @@ export default function MainApp({ user, setUser }) {
       .then(({ data }) => {
         setDayStatus(data.dayStatus || {});
         setEmojiData(data.emojiData || {});
+        console.log("useeffect data", data);
         setProfileImage(buildImageUrl(data.profileImage));
         console.log("✅ User data loaded:", data);
       })
@@ -167,7 +160,7 @@ export default function MainApp({ user, setUser }) {
         "Transform Your Life in 75 Days"
       </Typography>
 
-      <ProfileImage userId={user.id} profileImage={profileImage || "/images/justman.png"} setProfileImage={setProfileImage} style={{ marginLeft: "auto", marginRight: "auto", padding: "16px" }} />
+      <ProfileImage userId={user.id} profileImage={profileImage? profileImage:justman} setProfileImage={setProfileImage} style={{ marginLeft: "auto", marginRight: "auto", padding: "16px" }} />
       <ChallengeTimer />
 
       <Grid container spacing={2} justifyContent="center">
