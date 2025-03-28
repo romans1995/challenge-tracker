@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { Typography, Box } from "@mui/material";
 
-export default function ChallengeTimer() {
+export default function ChallengeTimer({ startDate, endDate }) {
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   function calculateTimeLeft() {
-    const challengeStartDate = new Date("2025-03-09T00:00:00Z");
-    const challengeEndDate = new Date(challengeStartDate);
-    challengeEndDate.setDate(challengeStartDate.getDate() + 75);
-
     const now = new Date();
-    const difference = challengeEndDate - now;
 
-    if (difference <= 0) {
+    const start = new Date(startDate);
+    const end = endDate ? new Date(endDate) : new Date(start);
+    if (!endDate) end.setDate(start.getDate() + 75); // Fallback to 75 days
+
+    const diff = end - now;
+
+    if (diff <= 0) {
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     }
 
     return {
-      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-      minutes: Math.floor((difference / (1000 * 60)) % 60),
-      seconds: Math.floor((difference / 1000) % 60),
+      days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((diff / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((diff / (1000 * 60)) % 60),
+      seconds: Math.floor((diff / 1000) % 60),
     };
   }
 
@@ -30,7 +31,7 @@ export default function ChallengeTimer() {
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [startDate, endDate]);
 
   return (
     <Box
@@ -46,12 +47,12 @@ export default function ChallengeTimer() {
         sx={{
           display: "flex",
           gap: "15px",
-          background: "rgba(0, 0, 0, 0.3)", // ✅ Dark background
+          background: "rgba(0, 0, 0, 0.3)",
           padding: "15px 25px",
           borderRadius: "15px",
-          backdropFilter: "blur(10px)", // ✅ Subtle glassmorphism effect
-          border: "2px solid rgba(0, 255, 255, 0.5)", // ✅ Neon cyan border
-          boxShadow: "0px 0px 15px rgba(0, 255, 255, 0.5)", // ✅ Glowing effect
+          backdropFilter: "blur(10px)",
+          border: "2px solid rgba(0, 255, 255, 0.5)",
+          boxShadow: "0px 0px 15px rgba(0, 255, 255, 0.5)",
         }}
       >
         {Object.entries(timeLeft).map(([unit, value], index) => (
@@ -61,7 +62,7 @@ export default function ChallengeTimer() {
               sx={{
                 fontWeight: "bold",
                 color: "cyan",
-                textShadow: "0px 0px 10px rgba(0, 255, 255, 0.8)", // ✅ Neon glow effect
+                textShadow: "0px 0px 10px rgba(0, 255, 255, 0.8)",
               }}
             >
               {String(value).padStart(2, "0")}

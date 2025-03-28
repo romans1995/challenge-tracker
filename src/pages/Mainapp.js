@@ -4,92 +4,103 @@ import { Container, Grid, Card, CardContent, Typography, Dialog, DialogTitle, Di
 import ProfileImage from "../components/ProfileImage";
 import ChallengeTimer from "../components/ChallengeTimer";
 import "../App.css";
-import { useNavigate } from "react-router-dom";
 import justman from '../assets/justman.png';
+import NeonLoader from "../components/NeonLoader";
 
-
-// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+// const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function MainApp({ user, setUser }) {
-  const navigate = useNavigate();
-  const totalDays = 75;
-  const challengeStartDate = new Date("2025-03-09T00:00:00Z");
-
   const [dayStatus, setDayStatus] = useState({});
   const [emojiData, setEmojiData] = useState({});
   const [selectedDay, setSelectedDay] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [profileImage, setProfileImage] = useState(null);
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
 
   const saveData = (updatedDayStatus, updatedEmojiData) => {
     if (user?._id) {
-      // Remove upload folder prefix if needed
       const imagePath = profileImage?.includes("/uploads/")
         ? profileImage.split("/uploads/")[1]
         : null;
-  
+
       const cleanProfileImage = imagePath ? `${imagePath}` : profileImage;
-  
-      // Check if profile image was changed
+
       const hasImageChanged = cleanProfileImage !== user.profileImage;
-  
-      // Build payload
+
       const payload = {
         dayStatus: updatedDayStatus,
         emojiData: updatedEmojiData,
+        startDate,
+        endDate,
       };
-  
+
       if (hasImageChanged) {
         payload.profileImage = cleanProfileImage;
       }
-      
-  
+
       axios.post(`${BACKEND_URL}/save`, payload, {
         headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
       })
-      .then((res) => {
-        console.log("✅ Saving status");
-      })
-      .catch(err => console.error("❌ Error saving data:", err))
-      .finally(() => console.log("saveData call finished"));
+        .then(() => console.log("✅ Saving status"))
+        .catch(err => console.error("❌ Error saving data:", err))
+        .finally(() => console.log("saveData call finished"));
     }
   };
+
   const buildImageUrl = (imagePath) => {
     if (!imagePath) return null;
-  
-    // ✅ If it's already a full Cloudinary or external URL, return as-is
-    if (imagePath.startsWith("http")) {
-      return imagePath;
-    }
-  
-    // ✅ Otherwise, it's likely a local fallback
-    return `${BACKEND_URL.replace(/\/+$/, "")}/${imagePath.replace(/^\/+/, "")}`;
+    if (imagePath.startsWith("http")) return imagePath;
+    return `${BACKEND_URL.replace(/\/+\$/, "")}/${imagePath.replace(/^\/+\$/, "")}`;
   };
-  
-  
+
   useEffect(() => {
     axios.get(`${BACKEND_URL}/load`, {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     })
       .then(({ data }) => {
+        console.log("✅ User data loaded:", data);
         setDayStatus(data.dayStatus || {});
         setEmojiData(data.emojiData || {});
-        console.log("useeffect data", data);
         setProfileImage(buildImageUrl(data.profileImage));
-        console.log("✅ User data loaded:", data);
-      })
-      .catch(() => console.log("User data not found, starting fresh"));
-  }, []);
 
+        const defaultStart = new Date("2025-03-09T00:00:00Z");
+        const defaultEnd = new Date(defaultStart);
+        defaultEnd.setDate(defaultStart.getDate() + 75);
+
+        const start = data.startDate ? new Date(data.startDate) : defaultStart;
+        const end = data.endDate ? new Date(data.endDate) : defaultEnd;
+
+        setStartDate(start);
+        setEndDate(end);
+      })
+      .catch(() => {
+        console.log("User data not found, starting fresh");
+        const defaultStart = new Date("2025-03-09T00:00:00Z");
+        const defaultEnd = new Date(defaultStart);
+        defaultEnd.setDate(defaultStart.getDate() + 75);
+        setStartDate(defaultStart);
+        setEndDate(defaultEnd);
+      });
+  }, []);
   const getPassedDays = () => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
-    const start = new Date(challengeStartDate);
+    const start = new Date(startDate || "2025-03-09T00:00:00Z");
     start.setHours(0, 0, 0, 0);
     const diff = now - start;
     return Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24)));
   };
+
+  const getTotalDays = () => {
+    if (!startDate || !endDate) return 75;
+    const diff = new Date(endDate).getTime() - new Date(startDate).getTime();
+    return Math.ceil(diff / (1000 * 60 * 60 * 24));
+  };
+
+  const totalDays = getTotalDays();
+  console.log("Total days:", totalDays);
 
   const handleStatusChange = (day) => {
     const passedDays = getPassedDays();
@@ -124,7 +135,10 @@ export default function MainApp({ user, setUser }) {
     saveData(updatedDayStatus, updatedEmojiData);
   };
 
-  if (!user) return <div>Loading user data...</div>;
+  if (!user || !startDate || !endDate) return   <NeonLoader />;
+
+  // ... rest of your JSX remains unchanged
+
 
   return (
     <Container className="main-container"
@@ -146,7 +160,7 @@ export default function MainApp({ user, setUser }) {
           "100%": { textShadow: "0px 0px 25px rgba(0, 255, 255, 1)" },
         },
       }}>
-        75 Day Habit Challenge
+        {totalDays} Day Habit Challenge
       </Typography>
 
       <Typography variant="h5" textAlign="center" sx={{
@@ -157,11 +171,11 @@ export default function MainApp({ user, setUser }) {
         fontWeight: "300",
         marginBottom: "15px",
       }}>
-        "Transform Your Life in 75 Days"
+        "Transform Your Life in {totalDays} Days"
       </Typography>
 
-      <ProfileImage userId={user.id} profileImage={profileImage? profileImage:justman} setProfileImage={setProfileImage} style={{ marginLeft: "auto", marginRight: "auto", padding: "16px" }} />
-      <ChallengeTimer />
+      <ProfileImage userId={user.id} profileImage={profileImage ? profileImage : justman} setProfileImage={setProfileImage} style={{ marginLeft: "auto", marginRight: "auto", padding: "16px" }} />
+      <ChallengeTimer startDate={startDate} endDate={endDate} />
 
       <Grid container spacing={2} justifyContent="center">
         {Array.from({ length: totalDays }, (_, i) => {
@@ -180,21 +194,20 @@ export default function MainApp({ user, setUser }) {
                   height: "130px",
                   background: "rgba(255, 255, 255, 0.15)",
                   backdropFilter: "blur(8px)",
-                  border: `2px solid ${
-                    status === "success"
+                  border: `2px solid ${status === "success"
                       ? "rgba(0, 255, 127, 0.6)"
                       : status === "fail"
-                      ? "rgba(255, 69, 69, 0.6)"
-                      : "rgba(255, 255, 255, 0.3)"
-                  }`,
+                        ? "rgba(255, 69, 69, 0.6)"
+                        : "rgba(255, 255, 255, 0.3)"
+                    }`,
                   boxShadow:
                     status === "success"
                       ? "0px 0px 15px rgba(0, 255, 127, 0.5)"
                       : status === "fail"
-                      ? "0px 0px 15px rgba(255, 69, 69, 0.5)"
-                      : isClickable
-                      ? "0px 4px 10px rgba(0, 255, 255, 0.3)"
-                      : "none",
+                        ? "0px 0px 15px rgba(255, 69, 69, 0.5)"
+                        : isClickable
+                          ? "0px 4px 10px rgba(0, 255, 255, 0.3)"
+                          : "none",
                   cursor: isClickable ? "pointer" : "not-allowed",
                   display: "flex",
                   justifyContent: "center",
@@ -207,8 +220,8 @@ export default function MainApp({ user, setUser }) {
                       status === "success"
                         ? "0px 0px 20px rgba(0, 255, 127, 0.7)"
                         : status === "fail"
-                        ? "0px 0px 20px rgba(255, 69, 69, 0.7)"
-                        : "0px 4px 15px rgba(0, 255, 255, 0.5)",
+                          ? "0px 0px 20px rgba(255, 69, 69, 0.7)"
+                          : "0px 4px 15px rgba(0, 255, 255, 0.5)",
                     transform: isClickable ? "scale(1.05)" : "none",
                   },
                 }}

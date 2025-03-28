@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
 
 
 
-// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
+// const BACKEND_URL = "http://localhost:5000";// Change when deploying // Change when deploying
 
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("");

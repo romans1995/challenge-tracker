@@ -1,30 +1,46 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { TextField, Button, Typography, Box, Container } from "@mui/material";
-import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
+import { useNavigate } from "react-router-dom";
+import ChallengeDatePicker from "../components/ChallengeDatePicker";
 
-
-
-// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com";
+// const BACKEND_URL = "http://localhost:5000";
 
 export default function Signup({ setUser }) {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [error, setError] = useState("");
 
-
-
   const handleSignup = async () => {
-    try {
-      const { data } = await axios.post(`${BACKEND_URL}/signup`, { email, password });
-      // localStorage.setItem("token", data.token); // ✅ Save token
-      // setUser(data.user);
-      navigate("/login");
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return setError("❌ Please enter a valid email address.");
+    }
+    if (!password || password.length < 6) {
+      return setError("❌ Password must be at least 6 characters.");
+    }
+    if (!startDate || !endDate) {
+      return setError("❌ Please select a challenge start and end date.");
+    }
+    const diffDays = Math.ceil((new Date(endDate) - new Date(startDate)) / (1000 * 60 * 60 * 24));
+    if (diffDays <= 0 || diffDays > 365) {
+      return setError("❌ Challenge duration must be between 1 and 365 days.");
+    }
 
+    try {
+      const {data} = await axios.post(`${BACKEND_URL}/signup`, {
+        email,
+        password,
+        startDate,
+        endDate,
+      });
+      navigate("/login");
     } catch (err) {
-      setError("Signup failed. Try a different email.");
+      console.error("Signup error:", err);
+      setError("❌ Signup failed. Try a different email.");
     }
   };
 
@@ -35,21 +51,22 @@ export default function Signup({ setUser }) {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        background: "linear-gradient(135deg, #000000 0%, #1a1a1a 100%)",
         color: "#fff",
       }}
     >
       <Box
         sx={{
           width: "100%",
-          maxWidth: "400px",
+          maxWidth: "450px",
           padding: "2rem",
-          borderRadius: "10px",
-          boxShadow: "0 0 20px rgba(255, 255, 255, 0.2)",
-          background: "rgba(0, 0, 0, 0.8)",
+          borderRadius: "15px",
+          boxShadow: "0 0 25px #00e5ff",
+          background: "#0d0d0d",
         }}
       >
         <Box textAlign="center" mb={3}>
-          <Typography variant="h4" sx={{ color: "#00e5ff", fontWeight: "bold" }}>
+          <Typography variant="h4" sx={{ color: "#00e5ff", fontWeight: "bold", textShadow: "0 0 10px #00e5ff" }}>
             Sign Up for the Challenge
           </Typography>
         </Box>
@@ -88,29 +105,39 @@ export default function Signup({ setUser }) {
               mb: 2,
             }}
           />
-          {error && <Typography color="red">{error}</Typography>}
+
+          <ChallengeDatePicker
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+          />
+
+          {error && <Typography color="red" mt={1}>{error}</Typography>}
           <Button
             variant="contained"
-            color="primary"
             onClick={handleSignup}
             sx={{
-              mt: 2,
+              mt: 3,
+              width: "100%",
               background: "#00e5ff",
               color: "#000",
-              "&:hover": { background: "#00bcd4" },
+              fontWeight: "bold",
+              boxShadow: "0 0 10px #00e5ff",
+              "&:hover": { background: "#00bcd4", boxShadow: "0 0 15px #00bcd4" },
             }}
           >
             Sign Up
           </Button>
 
-          {/* ✅ Back to Login Button */}
-          <Typography mt={2}>Already have an account?</Typography>
+          <Typography mt={3}>Already have an account?</Typography>
           <Button
             variant="text"
-            color="secondary"
             onClick={() => navigate("/login")}
             sx={{
               color: "#00e5ff",
+              textShadow: "0 0 5px #00e5ff",
+              fontWeight: "bold",
               "&:hover": { color: "#00bcd4" },
             }}
           >

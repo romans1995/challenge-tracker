@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@mui/material";
 import axios from "axios";
+import NeonLoader from "./NeonLoader";
+import justman from "../assets/justman.png";
 
 // 
-// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying // Change when deploying
-// const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
+// const BACKEND_URL = "http://localhost:5000";// Change when deploying // Change when deploying
 
 export default function ProfileImage({ userId, profileImage, setProfileImage }) {
   const fileInputRef = useRef(null);
@@ -61,7 +62,7 @@ export default function ProfileImage({ userId, profileImage, setProfileImage }) 
     <div style={{ textAlign: "center", cursor: "pointer" }}>
     {profileImage ? (
       <img
-        src={profileImage}
+        src={profileImage || justman}
         alt="Profile"
         onClick={() => fileInputRef.current.click()}
         style={{
@@ -80,7 +81,7 @@ export default function ProfileImage({ userId, profileImage, setProfileImage }) 
         onClick={() => fileInputRef.current.click()}
         disabled={loading}
       >
-        {loading ? "Uploading..." : "Upload Image"}
+        {loading ? <NeonLoader /> : "Upload Image"}
       </Button>
     )}
     <input

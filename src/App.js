@@ -6,10 +6,12 @@ import Signup from "./pages/Signup";
 import Navbar from "./components/Navbar";
 import axios from "axios";
 import About from "./pages/About";
+import NeonLoader from "./components/NeonLoader";
 
 
-// const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-const BACKEND_URL = "http://localhost:5000"; // Change when deploying // Or your deployed URL
+
+const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
+// const BACKEND_URL = "http://localhost:5000"; // Change when deploying
 
 function AppContent() {
   const [user, setUser] = useState(null);
@@ -46,7 +48,7 @@ function AppContent() {
     setUser(null);
   };
   if (loading) {
-    return <div style={{ color: "#00e5ff", textAlign: "center", marginTop: "2rem" }}>Loading...</div>;
+    return <div style={{ color: "#00e5ff", textAlign: "center", marginTop: "2rem" }}>  <NeonLoader /></div>;
   }
 
   return (
