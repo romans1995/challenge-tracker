@@ -81,7 +81,7 @@ export default function ProfileImage({ userId, profileImage, setProfileImage }) 
         onClick={() => fileInputRef.current.click()}
         disabled={loading}
       >
-        {loading ? <NeonLoader /> : "Upload Image"}
+        {loading ? <div>Waiting for user...</div> : "Upload Image"}
       </Button>
     )}
     <input

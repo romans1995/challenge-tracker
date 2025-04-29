@@ -7,7 +7,6 @@ import "../App.css";
 import justman from '../assets/justman.png';
 import NeonLoader from "../components/NeonLoader";
 
-// const BACKEND_URL = "http://localhost:5000"; // Change when deploying
 const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
 
 export default function MainApp({ user, setUser }) {
@@ -18,6 +17,7 @@ export default function MainApp({ user, setUser }) {
   const [profileImage, setProfileImage] = useState(null);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
+  const [hasInitialized, setHasInitialized] = useState(false);
 
   const saveData = (updatedDayStatus, updatedEmojiData) => {
     if (user?._id) {
@@ -56,34 +56,37 @@ export default function MainApp({ user, setUser }) {
   };
 
   useEffect(() => {
-    axios.get(`${BACKEND_URL}/load`, {
-      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
-    })
-      .then(({ data }) => {
-        console.log("✅ User data loaded:", data);
-        setDayStatus(data.dayStatus || {});
-        setEmojiData(data.emojiData || {});
-        setProfileImage(buildImageUrl(data.profileImage));
+    if (!user || !user._id || hasInitialized) return;
+  
+    const imagePath = user.profileImage?.includes("/uploads/")
+      ? user.profileImage.split("/uploads/")[1]
+      : null;
+  
+    const cleanProfileImage = imagePath ? `${imagePath}` : user.profileImage;
+  
+    setProfileImage(buildImageUrl(cleanProfileImage));
+    setDayStatus(user.dayStatus || {});
+    setEmojiData(user.emojiData || {});
+  
+    const defaultStart = new Date("2025-03-09T00:00:00Z");
+    const defaultEnd = new Date(defaultStart);
+    defaultEnd.setDate(defaultStart.getDate() + 75);
+  
+    const start = user.startDate ? new Date(user.startDate) : defaultStart;
+    const end = user.endDate ? new Date(user.endDate) : defaultEnd;
+  
+    setStartDate(start);
+    setEndDate(end);
+  
+    setHasInitialized(true); // ✅ only once
+    console.log("✅ User data loaded:", {
+      dayStatus: user.dayStatus,
+      emojiData: user.emojiData,
+      startDate: start,
+      endDate: end,
+    });
+  }, [user, hasInitialized]);
 
-        const defaultStart = new Date("2025-03-09T00:00:00Z");
-        const defaultEnd = new Date(defaultStart);
-        defaultEnd.setDate(defaultStart.getDate() + 75);
-
-        const start = data.startDate ? new Date(data.startDate) : defaultStart;
-        const end = data.endDate ? new Date(data.endDate) : defaultEnd;
-
-        setStartDate(start);
-        setEndDate(end);
-      })
-      .catch(() => {
-        console.log("User data not found, starting fresh");
-        const defaultStart = new Date("2025-03-09T00:00:00Z");
-        const defaultEnd = new Date(defaultStart);
-        defaultEnd.setDate(defaultStart.getDate() + 75);
-        setStartDate(defaultStart);
-        setEndDate(defaultEnd);
-      });
-  }, []);
   const getPassedDays = () => {
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -135,7 +138,7 @@ export default function MainApp({ user, setUser }) {
     saveData(updatedDayStatus, updatedEmojiData);
   };
 
-  if (!user || !startDate || !endDate) return   <NeonLoader />;
+  if (!hasInitialized) return <NeonLoader />;
 
   // ... rest of your JSX remains unchanged
 

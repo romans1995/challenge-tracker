@@ -28,6 +28,7 @@ function AppContent() {
         .then((res) => {
           console.log("✅ User loaded from backend:", res.data);
           setUser(res.data);
+          console.log("app.js User loaded:", res.data);
         })
         .catch((err) => {
           console.error("❌ Error loading user:", err);
@@ -55,10 +56,16 @@ function AppContent() {
     <>
       {!hideNavbar && <Navbar onLogout={handleLogout} user={user} />}
       <Routes>
-  <Route
-    path="/"
-    element={user ? <MainApp user={user} handleLogout={handleLogout} /> : <Navigate to="/login" />}
-  />
+      <Route
+  path="/"
+  element={
+    loading
+      ? <NeonLoader />
+      : user
+        ? <MainApp user={user} handleLogout={handleLogout} />
+        : <Navigate to="/login" />
+  }
+/>
   <Route
     path="/login"
     element={!user ? <Login setUser={setUser} /> : <Navigate to="/" />}
