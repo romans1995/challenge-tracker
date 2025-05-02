@@ -3,9 +3,11 @@ import axios from "axios";
 import { TextField, Button, Typography, Box, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import ChallengeDatePicker from "../components/ChallengeDatePicker";
+import ReCAPTCHA from "react-google-recaptcha";
 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com";
-// const BACKEND_URL = "http://localhost:5000";
+
+const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+
 
 export default function Signup({ setUser }) {
   const navigate = useNavigate();
@@ -14,6 +16,8 @@ export default function Signup({ setUser }) {
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [error, setError] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+
 
   const handleSignup = async () => {
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -36,6 +40,7 @@ export default function Signup({ setUser }) {
         password,
         startDate,
         endDate,
+        captchaToken,
       });
       navigate("/login");
     } catch (err) {
@@ -103,6 +108,8 @@ export default function Signup({ setUser }) {
                 "&.Mui-focused fieldset": { borderColor: "#00e5ff" },
               },
               mb: 2,
+
+
             }}
           />
 
@@ -144,7 +151,17 @@ export default function Signup({ setUser }) {
             Login
           </Button>
         </Box>
+        <ReCAPTCHA
+  sitekey="6Le2dSkrAAAAAD2rxx-UfuxNqyLqVEw9sCdE5N5z"
+  onChange={(token) => setCaptchaToken(token)}
+/>
+      <Box mt={2} textAlign="center">
+        <Typography variant="body2" sx={{ color: "#00e5ff" }}>
+          By signing up, you agree to our Terms of Service and Privacy Policy.
+        </Typography>
       </Box>
+      </Box>
+
     </Container>
   );
 }

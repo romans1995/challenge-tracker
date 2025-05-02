@@ -5,8 +5,8 @@ import { useNavigate } from "react-router-dom"; // ✅ Import navigation hook
 
 
 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-// const BACKEND_URL = "http://localhost:5000";// Change when deploying // Change when deploying
+//  const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+ const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";// Change when deploying // Change when deploying
 
 export default function Login({ setUser }) {
   const [email, setEmail] = useState("");
@@ -18,13 +18,18 @@ export default function Login({ setUser }) {
   const handleLogin = async () => {
     try {
       const { data } = await axios.post(`${BACKEND_URL}/login`, { email, password });
-      localStorage.setItem("token", data.token); // ✅ Save token in localStorage
-      setUser(data.token); // ✅ Store user data in state
-      navigate("/"); // ✅ Redirect to main page after login
+  
+      localStorage.setItem("token", data.token); // Save token
+      localStorage.setItem("user", JSON.stringify(data.user)); // Save user to localStorage (optional)
+  
+      setUser(data.user); // ✅ Set user, not token!
+  
+      navigate("/"); // ✅ Redirect to main page
     } catch (err) {
       setError("Invalid credentials. Please try again.");
     }
   };
+  
 
   return (
     <Container

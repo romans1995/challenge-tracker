@@ -5,8 +5,8 @@ import NeonLoader from "./NeonLoader";
 import justman from "../assets/justman.png";
 
 // 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-// const BACKEND_URL = "http://localhost:5000";// Change when deploying // Change when deploying
+const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+
 
 export default function ProfileImage({ userId, profileImage, setProfileImage }) {
   const fileInputRef = useRef(null);
@@ -64,6 +64,7 @@ export default function ProfileImage({ userId, profileImage, setProfileImage }) 
       <img
         src={profileImage || justman}
         alt="Profile"
+        onError={(e) => { e.target.src = "/images/fallback.png"; }}
         onClick={() => fileInputRef.current.click()}
         style={{
           width: "160px",

@@ -10,8 +10,8 @@ import NeonLoader from "./components/NeonLoader";
 
 
 
-const BACKEND_URL = "https://challenge-tracker-backend.onrender.com"; // Change when deploying
-// const BACKEND_URL = "http://localhost:5000"; // Change when deploying
+const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+
 
 function AppContent() {
   const [user, setUser] = useState(null);
