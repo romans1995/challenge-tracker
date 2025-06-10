@@ -7,7 +7,8 @@ import "../App.css";
 import justman from '../assets/justman.png';
 import NeonLoader from "../components/NeonLoader";
 
-const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+// const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+const BACKEND_URL = "http://127.0.0.1:5001/challenge-tracker-backend/us-central1/api";
 
 export default function MainApp({ user, setUser }) {
   const [dayStatus, setDayStatus] = useState({});

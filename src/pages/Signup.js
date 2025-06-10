@@ -6,7 +6,8 @@ import ChallengeDatePicker from "../components/ChallengeDatePicker";
 import ReCAPTCHA from "react-google-recaptcha";
 
 
-const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+// const BACKEND_URL = "https://us-central1-challenge-tracker-backend.cloudfunctions.net/api";
+const BACKEND_URL = "http://127.0.0.1:5001/challenge-tracker-backend/us-central1/api";
 
 
 export default function Signup({ setUser }) {
