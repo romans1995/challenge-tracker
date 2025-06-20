@@ -1,6 +1,3 @@
-from pathlib import Path
-
-updated_readme_content = """
 # 📱 Challenge Tracker App
 
 🔗 **[Try Live](https://firebrick-sparrow-109953.hostingersite.com/login)**
